@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useForm } from "react-hook-form";
 import { TbSocial } from "react-icons/tb";
 import { BsShare } from "react-icons/bs";
@@ -16,8 +16,13 @@ import { UserLogin } from "../redux/userSlice";
 const Login = () => {
   const [errMsg, setErrMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigation = useNavigate();
+
+  useEffect(() => {
+    if (user) return navigation("/");
+  }, []);
 
   const {
     register,
