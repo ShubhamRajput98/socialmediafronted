@@ -36,7 +36,10 @@ const Login = () => {
     try {
       setIsSubmitting(true);
       const response = await PostApiCall(LOGIN_URL, data);
-      if (response.user.verified === true) {
+
+      console.log(response);
+
+      if (response?.user?.verified === true) {
         toast.success(response.message, {
           style: {
             borderRadius: "10px",
@@ -45,13 +48,25 @@ const Login = () => {
           },
           duration: 3000,
         });
+
         setIsSubmitting(false);
         localStorage.setItem("user", JSON.stringify(response.user));
         dispatch(UserLogin(response.user));
         navigation("/");
+      } else if (response?.message) {
+        setIsSubmitting(false);
+        toast.error(response?.message, {
+          style: {
+            borderRadius: "10px",
+            background: "#333",
+            color: "#fff",
+          },
+          duration: 3000,
+        });
       } else {
         setIsSubmitting(false);
-        toast.error(response.error, {
+
+        toast.error(response?.error[0]?.msg, {
           style: {
             borderRadius: "10px",
             background: "#333",

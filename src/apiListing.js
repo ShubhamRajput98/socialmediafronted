@@ -9,6 +9,8 @@ export const FRIEND_REQUEST = BASE_URL + "user/friend-request";
 export const GET_FRIEND_REQUEST = BASE_URL + "user/get-friend-request";
 export const ACCEPT_FRIEND_REQUEST = BASE_URL + "user/accept-friend-request";
 export const UPDATE_USER = BASE_URL + "user/update-user/";
+export const VIEW_PROFILE = BASE_URL + "user/view-profile";
+export const RESET_PASSWORD = BASE_URL + "user/request-reset-password";
 
 // posts
 export const CREATE_POST_URL = BASE_URL + "post/create-post";

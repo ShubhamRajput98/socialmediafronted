@@ -7,8 +7,9 @@ import Loading from "./Loading";
 import CustomButton from "./CustomButton";
 import { UpdateProfile, UserLogin } from "../redux/userSlice";
 import { PostApiCall } from "../apiCalling/PostApiCall";
-import { UPDATE_USER } from "../apiListing";
+import { GET_USER_URL, UPDATE_USER } from "../apiListing";
 import toast from "react-hot-toast";
+import { GetApiCall } from "../apiCalling/GetApiCall";
 
 const EditProfile = () => {
   const { user } = useSelector((state) => state.user);
@@ -27,9 +28,15 @@ const EditProfile = () => {
   });
 
   const onSubmit = async (data) => {
+    const newData = {
+      name: data.name,
+      profession: data.profession,
+      location: data.location,
+    };
+
     const response = await PostApiCall(
       UPDATE_USER + user?.userId,
-      { ...data, profileUrl },
+      { ...newData, profileUrl },
       "form"
     );
 
@@ -42,9 +49,9 @@ const EditProfile = () => {
         },
         duration: 3000,
       });
-
-      localStorage.setItem("user", JSON.stringify(response.user));
-      dispatch(UserLogin(response.user));
+      const updatedUser = await GetApiCall(GET_USER_URL + user.userId);
+      localStorage.setItem("user", JSON.stringify(updatedUser.user));
+      dispatch(UserLogin(updatedUser.user));
       dispatch(UpdateProfile(false));
     }
   };

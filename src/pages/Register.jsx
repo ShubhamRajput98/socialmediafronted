@@ -54,6 +54,15 @@ const Register = () => {
         setIsSubmitting(false);
       } else {
         setIsSubmitting(false);
+
+        toast.error(response?.error[0]?.msg, {
+          style: {
+            borderRadius: "10px",
+            background: "#333",
+            color: "#fff",
+          },
+          duration: 3000,
+        });
       }
     } catch (error) {
       toast.error(error.message, {

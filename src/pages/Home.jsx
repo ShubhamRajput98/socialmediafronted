@@ -27,6 +27,7 @@ import {
   GET_USER_URL,
   POST_LIKES,
   SUGGEST_FRIENDS_URL,
+  VIEW_PROFILE,
 } from "../apiListing";
 import { PostApiCall } from "../apiCalling/PostApiCall";
 import toast from "react-hot-toast";
@@ -114,9 +115,8 @@ const Home = () => {
 
   // accept friend request
 
-  const acceptFriendRequest = async (rid) => {
+  const acceptFriendRequest = async (rid, status) => {
     const userId = user.userId;
-    const status = "Accepted";
     const response = await PostApiCall(ACCEPT_FRIEND_REQUEST, {
       rid,
       userId,
@@ -156,6 +156,13 @@ const Home = () => {
     }
   };
 
+  // viewProfile
+
+  const viewProfile = async (id) => {
+    const userId = user.userId;
+    await PostApiCall(VIEW_PROFILE, { id, userId });
+  };
+
   // deletePost
 
   const deletePost = async (postId) => {
@@ -181,12 +188,6 @@ const Home = () => {
         duration: 3000,
       });
     }
-  };
-
-  // createComment
-  const createComment = async (postId, data) => {
-    console.log(data);
-    // const responce = await PostApiCall(CREATE_COMMENT+postId,{data})
   };
 
   // send post
@@ -228,7 +229,7 @@ const Home = () => {
 
         <div className="w-full flex gap-2 lg:gap-4 pt-5 pb-10 h-full">
           {/* LEFT */}
-          <div className="hidden w-1/3 lg:w-1/4 h-full md:flex flex-col gap-6 overflow-y-auto">
+          <div className="hidden w-1/3 lg:w-1/4 h-full px-4 md:px-0 md:flex flex-col gap-6 overflow-y-auto">
             <ProfileCard user={user} />
             <FriendsCard friends={user?.friends} />
           </div>
@@ -393,11 +394,12 @@ const Home = () => {
                       <CustomButton
                         title="Accept"
                         containerStyles="bg-[#0444a4] text-xs text-white px-1.5 py-1 rounded-full"
-                        onClick={() => acceptFriendRequest(_id)}
+                        onClick={() => acceptFriendRequest(_id, "Accepted")}
                       />
                       <CustomButton
                         title="Deny"
                         containerStyles="border border-[#666] text-xs text-ascent-1 px-1.5 py-1 rounded-full"
+                        onClick={() => acceptFriendRequest(_id, "Deny")}
                       />
                     </div>
                   </div>
@@ -420,6 +422,7 @@ const Home = () => {
                       to={"/profile/" + friend?._id}
                       key={friend?._id}
                       className="w-full flex gap-4 items-center cursor-pointer"
+                      onClick={() => viewProfile(friend?._id)}
                     >
                       <img
                         src={

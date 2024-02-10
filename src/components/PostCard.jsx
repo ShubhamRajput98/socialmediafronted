@@ -14,6 +14,7 @@ import {
   REPLY_COMMENT,
   GET_POST_COMMENTS,
   LIKE_COMMENT,
+  VIEW_PROFILE,
 } from "../apiListing";
 import { GetApiCall } from "../apiCalling/GetApiCall";
 import { PostApiCall } from "../apiCalling/PostApiCall";
@@ -180,10 +181,20 @@ const PostCard = ({ post, user, deletePost, likePost }) => {
     }
   };
 
+  // viewProfile
+
+  const viewProfile = async (id) => {
+    const userId = user.userId;
+    await PostApiCall(VIEW_PROFILE, { id, userId });
+  };
+
   return (
     <div className="mb-2 bg-primary p-4 rounded-xl">
       <div className="flex gap-3 items-center mb-2">
-        <Link to={"/profile/" + post?.userId?._id}>
+        <Link
+          to={"/profile/" + post?.userId?._id}
+          onClick={() => viewProfile(post?.userId?._id)}
+        >
           <img
             src={
               post?.userId?.profileUrl
