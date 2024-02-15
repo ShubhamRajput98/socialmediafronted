@@ -20,12 +20,14 @@ import {
   BASE_URL,
   CREATE_COMMENT,
   CREATE_POST_URL,
+  CREATE_POST_VIDEO_URL,
   DELETE_POST,
   FRIEND_REQUEST,
   GET_ALL_POSTS,
   GET_FRIEND_REQUEST,
   GET_USER_URL,
   POST_LIKES,
+  SEND_NOTIFICATION,
   SUGGEST_FRIENDS_URL,
   VIEW_PROFILE,
 } from "../apiListing";
@@ -34,16 +36,15 @@ import toast from "react-hot-toast";
 import { GetApiCall } from "../apiCalling/GetApiCall";
 import { UserLogin } from "../redux/userSlice";
 import { DeleteApiCall } from "../apiCalling/DeleteApiCall";
+import { SetPosts } from "../redux/postSlice";
 
 const Home = () => {
   const { user, edit } = useSelector((state) => state.user);
+  const { posts } = useSelector((state) => state.posts);
   const [friendRequest, setFriendRequest] = useState([]);
   const [suggestedFriends, setSuggestedFriends] = useState([]);
   const [errMsg, setErrMsg] = useState("");
   const [file, setFile] = useState(null);
-  const [posting, setPosting] = useState(false);
-  const [posts, setPosts] = useState(false);
-  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
 
   const {
@@ -54,7 +55,6 @@ const Home = () => {
   } = useForm();
 
   useEffect(() => {
-    getAllPostData(GET_ALL_POSTS, user.userId);
     getSuggestFriends(SUGGEST_FRIENDS_URL, user.userId);
     getFriendRequest(GET_FRIEND_REQUEST, user.userId);
     getUserData(GET_USER_URL + user.userId);
@@ -73,8 +73,9 @@ const Home = () => {
 
   const getAllPostData = async (url, userId) => {
     const response = await PostApiCall(url, { userId });
-    if (response.success === true) {
-      setPosts(response.data);
+    if (response?.success === true) {
+      dispatch(SetPosts(response?.data));
+    } else {
     }
   };
 
@@ -134,6 +135,7 @@ const Home = () => {
       });
 
       getFriendRequest(GET_FRIEND_REQUEST, user.userId);
+      getUserData(GET_USER_URL + user.userId);
     } else {
       toast.error(response.message, {
         style: {
@@ -192,13 +194,25 @@ const Home = () => {
 
   // send post
   const handlePostSubmit = async (data) => {
-    const value = {
+    const imageValue = {
       userId: user?.userId,
       description: data.description,
       image: file,
     };
-    const response = await PostApiCall(CREATE_POST_URL, value, "form");
+    const videoValue = {
+      userId: user?.userId,
+      description: data.description,
+      video: file,
+    };
+
+    const response = await PostApiCall(
+      file?.type?.startsWith("image") ? CREATE_POST_URL : CREATE_POST_VIDEO_URL,
+      file?.type?.startsWith("image") ? imageValue : videoValue,
+      "form"
+    );
     if (response.success === true) {
+      console.log(response);
+
       toast.success(response.message, {
         style: {
           borderRadius: "10px",
@@ -210,6 +224,18 @@ const Home = () => {
       setFile(null);
       reset();
       getAllPostData(GET_ALL_POSTS, user.userId);
+
+      // send notification
+
+      const userId = user?.userId;
+      const message = "upload a post";
+      const postId = response?.post?._id;
+
+      await PostApiCall(SEND_NOTIFICATION, {
+        userId,
+        message,
+        postId,
+      });
     } else if (response.status === 400) {
       toast.error(response.error, {
         style: {
@@ -323,22 +349,16 @@ const Home = () => {
                 </label>
 
                 <div>
-                  {posting ? (
-                    <Loading />
-                  ) : (
-                    <CustomButton
-                      type="submit"
-                      title="Post"
-                      containerStyles="bg-[#0444a4] text-white py-1 px-6 rounded-full font-semibold text-sm"
-                    />
-                  )}
+                  <CustomButton
+                    type="submit"
+                    title="Post"
+                    containerStyles="bg-[#0444a4] text-white py-1 px-6 rounded-full font-semibold text-sm"
+                  />
                 </div>
               </div>
             </form>
 
-            {loading ? (
-              <Loading />
-            ) : posts?.length > 0 ? (
+            {posts?.length > 0 ? (
               posts?.map((post) => (
                 <PostCard
                   key={post?._id}

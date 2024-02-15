@@ -37,8 +37,6 @@ const Login = () => {
       setIsSubmitting(true);
       const response = await PostApiCall(LOGIN_URL, data);
 
-      console.log(response);
-
       if (response?.user?.verified === true) {
         toast.success(response.message, {
           style: {

@@ -1,0 +1,572 @@
+import React, { useEffect, useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import moment from "moment";
+import { NoProfile } from "../assets";
+import { BiComment, BiLike, BiSolidLike } from "react-icons/bi";
+import { MdOutlineDeleteOutline } from "react-icons/md";
+import { useForm } from "react-hook-form";
+import TextInput from "../components/TextInput";
+import Loading from "../components/Loading";
+import CustomButton from "../components/CustomButton";
+import {
+  BASE_URL,
+  CREATE_COMMENT,
+  REPLY_COMMENT,
+  GET_POST_COMMENTS,
+  LIKE_COMMENT,
+  VIEW_PROFILE,
+  GET_ALL_POSTS,
+  DELETE_COMMENT,
+  DELETE_REPLY_COMMENT,
+  POST_LIKES,
+  GET_SINGL_POSTS,
+} from "../apiListing";
+import { GetApiCall } from "../apiCalling/GetApiCall";
+import { PostApiCall } from "../apiCalling/PostApiCall";
+import { DeleteApiCall } from "../apiCalling/DeleteApiCall";
+import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
+import { TopBar } from "../components";
+
+const SinglePost = () => {
+  const [post, setPost] = useState([]);
+  const [showAll, setShowAll] = useState(0);
+  const [showReply, setShowReply] = useState(0);
+  const [comments, setComments] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [replyComments, setReplyComments] = useState(0);
+  const [showComments, setShowComments] = useState(0);
+  const { user } = useSelector((state) => state.user);
+  const videoRef = useRef();
+  const location = useLocation();
+  const id = location.pathname.split("/")[2];
+
+  useEffect(() => {
+    if (id) {
+      getSinglePost(id);
+    }
+  }, [id]);
+
+  //   getSinglePost
+
+  const getSinglePost = async (id) => {
+    setLoading(true);
+    const responce = await GetApiCall(GET_SINGL_POSTS + id);
+    if (responce?.success === true) {
+      setPost(responce?.post[0]);
+      setLoading(false);
+    } else {
+      setLoading(false);
+    }
+  };
+
+  const getComments = async () => {
+    const responce = await GetApiCall(GET_POST_COMMENTS + post._id);
+    if (responce.success === true) {
+      setComments(responce?.postComments);
+      setReplyComments(responce?.postComments?.length);
+    }
+  };
+
+  const handleLike = async (url) => {
+    const userId = user.userId;
+    await PostApiCall(url, { userId });
+    getComments();
+    getSinglePost(id);
+  };
+
+  const likeComment = async (userId, id) => {
+    const responce = await PostApiCall(LIKE_COMMENT + id, { userId });
+    if (responce.success === true) {
+      getComments();
+    }
+  };
+
+  // delete comment
+  const deletePostComment = async (commentId, postId) => {
+    const responce = await DeleteApiCall(
+      DELETE_COMMENT + commentId + "/" + postId
+    );
+
+    if (responce.success === true) {
+      toast.success(responce.message, {
+        style: {
+          borderRadius: "10px",
+          background: "#333",
+          color: "#fff",
+        },
+        duration: 3000,
+      });
+      getSinglePost(id);
+
+      getComments();
+    } else {
+      toast.error("Somthing went wrong", {
+        style: {
+          borderRadius: "10px",
+          background: "#333",
+          color: "#fff",
+        },
+        duration: 3000,
+      });
+    }
+  };
+
+  // likePost
+
+  const likePost = async (postId) => {
+    const userId = user?.userId;
+    const responce = await PostApiCall(POST_LIKES + postId, { userId });
+    if (responce.success === true) {
+      getSinglePost(id);
+    }
+  };
+
+  // viewProfile
+
+  const viewProfile = async (id) => {
+    const userId = user.userId;
+    await PostApiCall(VIEW_PROFILE, { id, userId });
+  };
+
+  const playVideo = () => {
+    if (videoRef.current) {
+      if (videoRef.current.paused) {
+        videoRef.current.play();
+      } else {
+        videoRef.current.pause();
+      }
+    }
+  };
+
+  return (
+    <div className="w-full px-0 lg:px-10 pb-20 2xl:px-40 bg-bgColor lg:rounded-lg h-screen overflow-auto">
+      <TopBar />
+
+      {loading ? (
+        <div className="fixed w-screen h-screen flex content-center items-center bg-gray-900">
+          <Loading />
+        </div>
+      ) : (
+        <div className="w-full min-h-max mt-5 flex justify-center items-center">
+          <div className="w-[90vh] bg-primary p-4 rounded-xl">
+            <div className="flex gap-3 items-center mb-2">
+              <Link
+                to={"/profile/" + post?.userId?._id}
+                onClick={() => viewProfile(post?.userId?._id)}
+              >
+                <img
+                  src={
+                    post?.userId?.profileUrl
+                      ? BASE_URL + "user/" + post?.userId?.profileUrl
+                      : NoProfile
+                  }
+                  alt={post?.userId?.firstName}
+                  className="w-10 h-10 object-cover rounded-[50%] object-center"
+                />
+              </Link>
+
+              <div className="w-full flex justify-between">
+                <div className="">
+                  <Link to={"/profile/" + post?.userId?._id}>
+                    <p className="font-medium text-lg text-ascent-1">
+                      {post?.userId?.name}
+                    </p>
+                  </Link>
+                  <span className="text-ascent-2">
+                    {post?.userId?.location}
+                  </span>
+                </div>
+
+                <span className="text-ascent-2">
+                  {moment(post?.createdAt && post?.createdAt).fromNow()}
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-ascent-2">
+                {/* {showAll === post?._id
+            ? post?.description
+            : post?.description.slice(0, 300)} */}
+
+                {post?.description?.length > 301 &&
+                  (showAll === post?._id ? (
+                    <span
+                      className="text-blue ml-2 font-mediu cursor-pointer"
+                      onClick={() => setShowAll(0)}
+                    >
+                      Show Less
+                    </span>
+                  ) : (
+                    <span
+                      className="text-blue ml-2 font-medium cursor-pointer"
+                      onClick={() => setShowAll(post?._id)}
+                    >
+                      Show More
+                    </span>
+                  ))}
+              </p>
+
+              {post?.image && (
+                <img
+                  src={BASE_URL + "post/" + post?.image}
+                  alt="post image"
+                  className="w-full mt-2 rounded-lg"
+                />
+              )}
+
+              {post.video && post.video.length > 0 && (
+                <div className="video">
+                  <video
+                    onClick={playVideo}
+                    autoPlay={true}
+                    loop={true}
+                    ref={videoRef}
+                    width="100%"
+                  >
+                    <source src={BASE_URL + "post" + post.video[0]} />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4 flex justify-between items-center px-3 py-2 text-ascent-2 text-base border-t border-[#66666645]">
+              <p
+                className="flex gap-2 items-center text-base cursor-pointer"
+                onClick={() => likePost(post?._id)}
+              >
+                {post?.likes?.includes(user?.userId) ? (
+                  <BiSolidLike size={20} color="blue" />
+                ) : (
+                  <BiLike size={20} />
+                )}
+                {post?.likes?.length} Likes
+              </p>
+
+              <p
+                className="flex gap-2 items-center text-base cursor-pointer"
+                onClick={() => {
+                  setShowComments(showComments === post._id ? null : post._id);
+                  getComments(post?._id);
+                }}
+              >
+                <BiComment size={20} />
+                {post?.comments?.length} Comments
+              </p>
+
+              {user?.userId === post?.userId?._id && (
+                <div
+                  className="flex gap-1 items-center text-base text-ascent-1 cursor-pointer"
+                  //   onClick={() => deletePost(post?._id)}
+                >
+                  <MdOutlineDeleteOutline size={20} />
+                  <span>Delete</span>
+                </div>
+              )}
+            </div>
+
+            {/* COMMENTS */}
+            {showComments === post?._id && (
+              <div className="w-full mt-4 border-t border-[#66666645] pt-4 ">
+                <CommentForm
+                  user={user}
+                  id={post?._id}
+                  getComments={() => getComments(post?._id)}
+                />
+
+                {comments?.length > 0 ? (
+                  comments?.map((comment) => (
+                    <div className="w-full py-2" key={comment?._id}>
+                      <div className="flex gap-3 items-center mb-1">
+                        <Link to={"/profile/" + comment?.userId?._id}>
+                          <img
+                            src={
+                              comment?.userId?.profileUrl
+                                ? BASE_URL +
+                                  "post/" +
+                                  comment?.userId?.profileUrl
+                                : NoProfile
+                            }
+                            alt={comment?.userId?.name}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        </Link>
+                        <div>
+                          <Link to={"/profile/" + comment?.userId?._id}>
+                            <p className="font-medium text-base text-ascent-1">
+                              {comment?.userId?.name}
+                            </p>
+                          </Link>
+                          <span className="text-ascent-2 text-sm">
+                            {moment(
+                              comment?.createdAt ?? "2023-05-25"
+                            ).fromNow()}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="ml-12">
+                        <p className="text-ascent-2">{comment?.comment}</p>
+
+                        <div className="mt-2 flex gap-6">
+                          <p
+                            className="flex gap-2 items-center text-base text-ascent-2 cursor-pointer"
+                            onClick={() =>
+                              likeComment(user?.userId, comment._id)
+                            }
+                          >
+                            {comment?.likes?.includes(user?.userId) ? (
+                              <BiSolidLike size={20} color="blue" />
+                            ) : (
+                              <BiLike size={20} />
+                            )}
+                            {comment?.likes?.length} Likes
+                          </p>
+                          <span
+                            className="text-blue cursor-pointer"
+                            onClick={() => setReplyComments(comment?._id)}
+                          >
+                            Reply
+                          </span>
+
+                          {user?.userId === post?.userId?._id && (
+                            <div
+                              className="flex gap-1 items-center text-base text-ascent-1 cursor-pointer"
+                              onClick={() =>
+                                deletePostComment(comment?._id, post?._id)
+                              }
+                            >
+                              <MdOutlineDeleteOutline size={20} />
+                              <span>Delete</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {replyComments === comment?._id && (
+                          <CommentForm
+                            user={user}
+                            id={comment?._id}
+                            replyAt={new Date()}
+                            getComments={() => getComments(post?._id)}
+                          />
+                        )}
+                      </div>
+
+                      {/* REPLIES */}
+
+                      <div className="py-2 px-8 mt-6">
+                        {comment?.replies?.length > 0 && (
+                          <p
+                            className="text-base text-ascent-1 cursor-pointer"
+                            onClick={() =>
+                              setShowReply(
+                                showReply === comment?.replies?._id
+                                  ? 0
+                                  : comment?.replies?._id
+                              )
+                            }
+                          >
+                            Show Replies ({comment?.replies?.length})
+                          </p>
+                        )}
+
+                        {showReply === comment?.replies?._id &&
+                          comment?.replies?.map((reply) => (
+                            <ReplyCard
+                              reply={reply}
+                              user={user}
+                              key={reply?._id}
+                              handleLike={() =>
+                                handleLike(
+                                  `${BASE_URL}/post/like-comment/${comment?._id}/${reply?._id}`
+                                )
+                              }
+                              getComments={getComments}
+                            />
+                          ))}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <span className="flex text-sm py-4 text-ascent-2 text-center">
+                    No Comments, be first to comment
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default SinglePost;
+
+const ReplyCard = ({ reply, user, handleLike, getComments }) => {
+  const deleteReplyComment = async (comentReplyId) => {
+    const responce = await DeleteApiCall(DELETE_REPLY_COMMENT + comentReplyId);
+
+    if (responce.success === true) {
+      toast.success(responce.message, {
+        style: {
+          borderRadius: "10px",
+          background: "#333",
+          color: "#fff",
+        },
+        duration: 3000,
+      });
+      getComments();
+    } else {
+      toast.error("Somthing went wrong", {
+        style: {
+          borderRadius: "10px",
+          background: "#333",
+          color: "#fff",
+        },
+        duration: 3000,
+      });
+    }
+  };
+
+  return (
+    <div className="w-full py-3">
+      <div className="flex gap-3 items-center mb-1">
+        <Link to={"/profile/" + reply?.userId?._id}>
+          <img
+            src={
+              reply?.userId?.profileUrl
+                ? BASE_URL + "user/" + reply?.userId?.profileUrl
+                : NoProfile
+            }
+            alt={reply?.userId?.firstName}
+            className="w-10 h-10 rounded-full object-cover"
+          />
+        </Link>
+
+        <div>
+          <Link to={"/profile/" + reply?.userId?._id}>
+            <p className="font-medium text-base text-ascent-1">
+              {reply?.userId?.name}
+            </p>
+          </Link>
+          <span className="text-ascent-2 text-sm">
+            {moment(reply?.createdAt).fromNow()}
+          </span>
+        </div>
+      </div>
+
+      <div className="ml-12">
+        <p className="text-ascent-2 ">{reply?.comment}</p>
+        <div className="mt-2 flex gap-6">
+          <p
+            className="flex gap-2 items-center text-base text-ascent-2 cursor-pointer"
+            onClick={handleLike}
+          >
+            {reply?.likes?.includes(user?.userId) ? (
+              <BiSolidLike size={20} color="blue" />
+            ) : (
+              <BiLike size={20} />
+            )}
+            {reply?.likes?.length} Likes
+          </p>
+
+          {user?.userId === reply?.userId?._id && (
+            <div
+              className="flex gap-1 items-center text-base text-ascent-1 cursor-pointer"
+              onClick={() => deleteReplyComment(reply?._id)}
+            >
+              <MdOutlineDeleteOutline size={20} />
+              <span>Delete</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CommentForm = ({ user, id, replyAt, getComments }) => {
+  const [errMsg, setErrMsg] = useState("");
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    mode: "onChange",
+  });
+
+  const onSubmit = async (data) => {
+    if (replyAt) {
+      const chatData = {
+        commentFrom: data.comment,
+        form: user.name,
+        userId: user.userId,
+        replyAt,
+      };
+      await PostApiCall(REPLY_COMMENT + id, chatData);
+      reset();
+      getComments();
+    } else {
+      const chatData = {
+        commentFrom: data.comment,
+        form: user.name,
+        userId: user.userId,
+      };
+
+      await PostApiCall(CREATE_COMMENT + id, chatData);
+      reset();
+      getComments();
+    }
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="w-full border-b border-[#66666645]"
+    >
+      <div className="w-full flex items-center gap-2 py-4">
+        <img
+          src={
+            user?.profileUrl ? BASE_URL + "post/" + user?.profileUrl : NoProfile
+          }
+          alt="User Image"
+          className="w-10 h-10 rounded-full object-cover"
+        />
+
+        <TextInput
+          name="comment"
+          styles="w-full rounded-full py-3"
+          placeholder={replyAt ? `Reply @${replyAt}` : "Comment this post"}
+          register={register("comment", {
+            required: "Comment can not be empty",
+          })}
+          error={errors.comment ? errors.comment.message : ""}
+        />
+      </div>
+      {errMsg?.message && (
+        <span
+          role="alert"
+          className={`text-sm ${
+            errMsg?.status === "failed"
+              ? "text-[#f64949fe]"
+              : "text-[#2ba150fe]"
+          } mt-0.5`}
+        >
+          {errMsg?.message}
+        </span>
+      )}
+
+      <div className="flex items-end justify-end pb-2">
+        <CustomButton
+          title="Submit"
+          type="submit"
+          containerStyles="bg-[#0444a4] text-white py-1 px-3 rounded-full font-semibold text-sm"
+        />
+      </div>
+    </form>
+  );
+};

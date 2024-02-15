@@ -14,11 +14,21 @@ export const RESET_PASSWORD = BASE_URL + "user/request-reset-password";
 
 // posts
 export const CREATE_POST_URL = BASE_URL + "post/create-post";
+export const CREATE_POST_VIDEO_URL = BASE_URL + "post/create-post-video";
 export const GET_ALL_POSTS = BASE_URL + "post/get-all-posts";
+export const GET_SINGL_POSTS = BASE_URL + "post/";
 export const GET_ALL_USER_POSTS = BASE_URL + "post/get-user-post/";
 export const POST_LIKES = BASE_URL + "post/likes/";
 export const CREATE_COMMENT = BASE_URL + "post/create-comment/";
 export const REPLY_COMMENT = BASE_URL + "post/reply-comment/";
 export const GET_POST_COMMENTS = BASE_URL + "post/get-comments/";
 export const LIKE_COMMENT = BASE_URL + "post/like-comment/";
-export const DELETE_POST = BASE_URL + "post/";
+export const DELETE_POST = BASE_URL + "post/deletePost/";
+export const DELETE_COMMENT = BASE_URL + "post/deleteComment/";
+export const DELETE_REPLY_COMMENT = BASE_URL + "post/deleteReplyComment/";
+
+// notification
+export const GET_NOTIFICATION = BASE_URL + "notification/getNotification/";
+export const SEND_NOTIFICATION = BASE_URL + "notification/sendNotification";
+export const READ_ALL_NOTIFICATION =
+  BASE_URL + "notification/readAllNotification/";

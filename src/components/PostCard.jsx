@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import { NoProfile } from "../assets";
@@ -15,11 +15,43 @@ import {
   GET_POST_COMMENTS,
   LIKE_COMMENT,
   VIEW_PROFILE,
+  GET_ALL_POSTS,
+  DELETE_COMMENT,
+  DELETE_REPLY_COMMENT,
 } from "../apiListing";
 import { GetApiCall } from "../apiCalling/GetApiCall";
 import { PostApiCall } from "../apiCalling/PostApiCall";
+import { DeleteApiCall } from "../apiCalling/DeleteApiCall";
+import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { SetPosts } from "../redux/postSlice";
 
-const ReplyCard = ({ reply, user, handleLike }) => {
+const ReplyCard = ({ reply, user, handleLike, getComments }) => {
+  const deleteReplyComment = async (comentReplyId) => {
+    const responce = await DeleteApiCall(DELETE_REPLY_COMMENT + comentReplyId);
+
+    if (responce.success === true) {
+      toast.success(responce.message, {
+        style: {
+          borderRadius: "10px",
+          background: "#333",
+          color: "#fff",
+        },
+        duration: 3000,
+      });
+      getComments();
+    } else {
+      toast.error("Somthing went wrong", {
+        style: {
+          borderRadius: "10px",
+          background: "#333",
+          color: "#fff",
+        },
+        duration: 3000,
+      });
+    }
+  };
+
   return (
     <div className="w-full py-3">
       <div className="flex gap-3 items-center mb-1">
@@ -61,6 +93,16 @@ const ReplyCard = ({ reply, user, handleLike }) => {
             )}
             {reply?.likes?.length} Likes
           </p>
+
+          {user?.userId === reply?.userId?._id && (
+            <div
+              className="flex gap-1 items-center text-base text-ascent-1 cursor-pointer"
+              onClick={() => deleteReplyComment(reply?._id)}
+            >
+              <MdOutlineDeleteOutline size={20} />
+              <span>Delete</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -110,7 +152,9 @@ const CommentForm = ({ user, id, replyAt, getComments }) => {
     >
       <div className="w-full flex items-center gap-2 py-4">
         <img
-          src={BASE_URL + "post/" + user?.profileUrl ?? NoProfile}
+          src={
+            user?.profileUrl ? BASE_URL + "post/" + user?.profileUrl : NoProfile
+          }
           alt="User Image"
           className="w-10 h-10 rounded-full object-cover"
         />
@@ -160,6 +204,17 @@ const PostCard = ({ post, user, deletePost, likePost }) => {
   const [loading, setLoading] = useState(false);
   const [replyComments, setReplyComments] = useState(0);
   const [showComments, setShowComments] = useState(0);
+  const videoRef = useRef();
+  const dispatch = useDispatch();
+
+  // getAllPostData
+
+  const getAllPostData = async (url, userId) => {
+    const response = await PostApiCall(url, { userId });
+    if (response.success === true) {
+      dispatch(SetPosts(response.data));
+    }
+  };
 
   const getComments = async () => {
     const responce = await GetApiCall(GET_POST_COMMENTS + post._id);
@@ -181,11 +236,50 @@ const PostCard = ({ post, user, deletePost, likePost }) => {
     }
   };
 
+  // delete comment
+  const deletePostComment = async (commentId, postId) => {
+    const responce = await DeleteApiCall(
+      DELETE_COMMENT + commentId + "/" + postId
+    );
+
+    if (responce.success === true) {
+      toast.success(responce.message, {
+        style: {
+          borderRadius: "10px",
+          background: "#333",
+          color: "#fff",
+        },
+        duration: 3000,
+      });
+      getAllPostData(GET_ALL_POSTS, user.userId);
+      getComments();
+    } else {
+      toast.error("Somthing went wrong", {
+        style: {
+          borderRadius: "10px",
+          background: "#333",
+          color: "#fff",
+        },
+        duration: 3000,
+      });
+    }
+  };
+
   // viewProfile
 
   const viewProfile = async (id) => {
     const userId = user.userId;
     await PostApiCall(VIEW_PROFILE, { id, userId });
+  };
+
+  const playVideo = () => {
+    if (videoRef.current) {
+      if (videoRef.current.paused) {
+        videoRef.current.play();
+      } else {
+        videoRef.current.pause();
+      }
+    }
   };
 
   return (
@@ -252,6 +346,21 @@ const PostCard = ({ post, user, deletePost, likePost }) => {
             alt="post image"
             className="w-full mt-2 rounded-lg"
           />
+        )}
+
+        {post.video && post.video.length > 0 && (
+          <div className="video">
+            <video
+              onClick={playVideo}
+              autoPlay={true}
+              loop={true}
+              ref={videoRef}
+              width="100%"
+            >
+              <source src={BASE_URL + "post" + post.video[0]} />
+              Your browser does not support the video tag.
+            </video>
+          </div>
         )}
       </div>
 
@@ -352,6 +461,18 @@ const PostCard = ({ post, user, deletePost, likePost }) => {
                     >
                       Reply
                     </span>
+
+                    {user?.userId === post?.userId?._id && (
+                      <div
+                        className="flex gap-1 items-center text-base text-ascent-1 cursor-pointer"
+                        onClick={() =>
+                          deletePostComment(comment?._id, post?._id)
+                        }
+                      >
+                        <MdOutlineDeleteOutline size={20} />
+                        <span>Delete</span>
+                      </div>
+                    )}
                   </div>
 
                   {replyComments === comment?._id && (
@@ -393,6 +514,7 @@ const PostCard = ({ post, user, deletePost, likePost }) => {
                             `${BASE_URL}/post/like-comment/${comment?._id}/${reply?._id}`
                           )
                         }
+                        getComments={getComments}
                       />
                     ))}
                 </div>
