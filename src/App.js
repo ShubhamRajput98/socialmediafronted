@@ -3,13 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { Suspense, lazy, useEffect } from "react";
 import { checkToken } from "./apiCalling/CheckToken";
 import { Loading } from "./components";
-import { GET_ALL_POSTS, GET_NOTIFICATION } from "./apiListing";
+import { GET_ALL_POSTS } from "./apiListing";
 import { SetPosts } from "./redux/postSlice";
 import { PostApiCall } from "./apiCalling/PostApiCall";
-
-// import io from "socket.io-client";
-
-// const socket = io("http://localhost:5500");
 
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
@@ -19,14 +15,14 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const SinglePost = lazy(() => import("./pages/SinglePost"));
 
 function Layout() {
-  const { user } = useSelector((state) => state.user || {});
+  const { user } = useSelector((state) => state.user || null);
   const dispatch = useDispatch();
   const location = useLocation();
 
   useEffect(() => {
     checkToken();
-    getAllPostData(GET_ALL_POSTS, user.userId);
-  }, []);
+    getAllPostData(GET_ALL_POSTS, user?.userId);
+  });
 
   // getAllPostData
 

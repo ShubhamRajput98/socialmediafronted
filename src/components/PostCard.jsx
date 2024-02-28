@@ -109,7 +109,7 @@ const ReplyCard = ({ reply, user, handleLike, getComments }) => {
   );
 };
 
-const CommentForm = ({ user, id, replyAt, getComments }) => {
+const CommentForm = ({ user, id, replyAt, getComments, getAllPostData }) => {
   const [loading, setLoading] = useState(false);
   const [errMsg, setErrMsg] = useState("");
   const {
@@ -126,22 +126,24 @@ const CommentForm = ({ user, id, replyAt, getComments }) => {
       const chatData = {
         commentFrom: data.comment,
         form: user.name,
-        userId: user.userId,
+        userId: user?.userId,
         replyAt,
       };
       await PostApiCall(REPLY_COMMENT + id, chatData);
       reset();
-      getComments();
+      getComments(id);
+      getAllPostData(GET_ALL_POSTS, user?.userId);
     } else {
       const chatData = {
         commentFrom: data.comment,
         form: user.name,
-        userId: user.userId,
+        userId: user?.userId,
       };
 
       await PostApiCall(CREATE_COMMENT + id, chatData);
       reset();
-      getComments();
+      getComments(id);
+      getAllPostData(GET_ALL_POSTS, user?.userId);
     }
   };
 
@@ -225,7 +227,7 @@ const PostCard = ({ post, user, deletePost, likePost }) => {
     }
   };
   const handleLike = async (url) => {
-    const userId = user.userId;
+    const userId = user?.userId;
     await PostApiCall(url, { userId });
     getComments();
   };
@@ -251,7 +253,7 @@ const PostCard = ({ post, user, deletePost, likePost }) => {
         },
         duration: 3000,
       });
-      getAllPostData(GET_ALL_POSTS, user.userId);
+      getAllPostData(GET_ALL_POSTS, user?.userId);
       getComments();
     } else {
       toast.error("Somthing went wrong", {
@@ -268,7 +270,7 @@ const PostCard = ({ post, user, deletePost, likePost }) => {
   // viewProfile
 
   const viewProfile = async (id) => {
-    const userId = user.userId;
+    const userId = user?.userId;
     await PostApiCall(VIEW_PROFILE, { id, userId });
   };
 
@@ -408,7 +410,8 @@ const PostCard = ({ post, user, deletePost, likePost }) => {
           <CommentForm
             user={user}
             id={post?._id}
-            getComments={() => getComments(post?._id)}
+            getComments={getComments}
+            getAllPostData={getAllPostData}
           />
 
           {loading ? (
@@ -462,7 +465,7 @@ const PostCard = ({ post, user, deletePost, likePost }) => {
                       Reply
                     </span>
 
-                    {user?.userId === post?.userId?._id && (
+                    {user?.userId === comment?.userId?._id && (
                       <div
                         className="flex gap-1 items-center text-base text-ascent-1 cursor-pointer"
                         onClick={() =>
@@ -481,6 +484,7 @@ const PostCard = ({ post, user, deletePost, likePost }) => {
                       id={comment?._id}
                       replyAt={new Date()}
                       getComments={() => getComments(post?._id)}
+                      getAllPostData={getAllPostData}
                     />
                   )}
                 </div>

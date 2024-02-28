@@ -55,10 +55,10 @@ const Home = () => {
   } = useForm();
 
   useEffect(() => {
-    getSuggestFriends(SUGGEST_FRIENDS_URL, user.userId);
-    getFriendRequest(GET_FRIEND_REQUEST, user.userId);
-    getUserData(GET_USER_URL + user.userId);
-  }, [user.userId]);
+    getSuggestFriends(SUGGEST_FRIENDS_URL, user?.userId);
+    getFriendRequest(GET_FRIEND_REQUEST, user?.userId);
+    getUserData(GET_USER_URL + user?.userId);
+  }, [user?.userId]);
 
   // getUserData
   const getUserData = async (url) => {
@@ -100,7 +100,7 @@ const Home = () => {
   // sendFriendRequest
 
   const sendFriendRequest = async (requestTo) => {
-    const userId = user.userId;
+    const userId = user?.userId;
     const response = await PostApiCall(FRIEND_REQUEST, { requestTo, userId });
     if (response.message) {
       toast.success(response.message, {
@@ -117,7 +117,7 @@ const Home = () => {
   // accept friend request
 
   const acceptFriendRequest = async (rid, status) => {
-    const userId = user.userId;
+    const userId = user?.userId;
     const response = await PostApiCall(ACCEPT_FRIEND_REQUEST, {
       rid,
       userId,
@@ -134,8 +134,8 @@ const Home = () => {
         duration: 3000,
       });
 
-      getFriendRequest(GET_FRIEND_REQUEST, user.userId);
-      getUserData(GET_USER_URL + user.userId);
+      getFriendRequest(GET_FRIEND_REQUEST, user?.userId);
+      getUserData(GET_USER_URL + user?.userId);
     } else {
       toast.error(response.message, {
         style: {
@@ -154,14 +154,14 @@ const Home = () => {
     const userId = user?.userId;
     const responce = await PostApiCall(POST_LIKES + postId, { userId });
     if (responce.success === true) {
-      getAllPostData(GET_ALL_POSTS, user.userId);
+      getAllPostData(GET_ALL_POSTS, user?.userId);
     }
   };
 
   // viewProfile
 
   const viewProfile = async (id) => {
-    const userId = user.userId;
+    const userId = user?.userId;
     await PostApiCall(VIEW_PROFILE, { id, userId });
   };
 
@@ -179,7 +179,7 @@ const Home = () => {
         },
         duration: 3000,
       });
-      getAllPostData(GET_ALL_POSTS, user.userId);
+      getAllPostData(GET_ALL_POSTS, user?.userId);
     } else {
       toast.error("Somthing went wrong", {
         style: {
@@ -223,7 +223,7 @@ const Home = () => {
       });
       setFile(null);
       reset();
-      getAllPostData(GET_ALL_POSTS, user.userId);
+      getAllPostData(GET_ALL_POSTS, user?.userId);
 
       // send notification
 

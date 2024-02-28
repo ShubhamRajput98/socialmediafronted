@@ -16,13 +16,13 @@ import { UserLogin } from "../redux/userSlice";
 const Login = () => {
   const [errMsg, setErrMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { user } = useSelector((state) => state.user);
+  const { user } = useSelector((state) => state.user || null);
   const dispatch = useDispatch();
   const navigation = useNavigate();
 
   useEffect(() => {
     if (user) return navigation("/");
-  }, []);
+  }, [user]);
 
   const {
     register,
