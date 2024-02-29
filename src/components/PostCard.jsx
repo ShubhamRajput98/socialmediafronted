@@ -350,11 +350,11 @@ const PostCard = ({ post, user, deletePost, likePost }) => {
           />
         )}
 
-        {post.video && post.video.length > 0 && (
+        {post?.video && post?.video?.length > 0 && (
           <div className="video">
             <video
               onClick={playVideo}
-              autoPlay={true}
+              autoPlay={false}
               loop={true}
               ref={videoRef}
               width="100%"

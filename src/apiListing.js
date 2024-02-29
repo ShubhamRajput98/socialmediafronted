@@ -32,3 +32,5 @@ export const GET_NOTIFICATION = BASE_URL + "notification/getNotification/";
 export const SEND_NOTIFICATION = BASE_URL + "notification/sendNotification";
 export const READ_ALL_NOTIFICATION =
   BASE_URL + "notification/readAllNotification/";
+export const DELETE_NOTIFICATION =
+  BASE_URL + "notification/deleteNotification/";

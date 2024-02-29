@@ -21,10 +21,12 @@ import {
   CREATE_COMMENT,
   CREATE_POST_URL,
   CREATE_POST_VIDEO_URL,
+  DELETE_NOTIFICATION,
   DELETE_POST,
   FRIEND_REQUEST,
   GET_ALL_POSTS,
   GET_FRIEND_REQUEST,
+  GET_NOTIFICATION,
   GET_USER_URL,
   POST_LIKES,
   SEND_NOTIFICATION,
@@ -36,7 +38,7 @@ import toast from "react-hot-toast";
 import { GetApiCall } from "../apiCalling/GetApiCall";
 import { UserLogin } from "../redux/userSlice";
 import { DeleteApiCall } from "../apiCalling/DeleteApiCall";
-import { SetPosts } from "../redux/postSlice";
+import { SetNotification, SetPosts } from "../redux/postSlice";
 
 const Home = () => {
   const { user, edit } = useSelector((state) => state.user);
@@ -59,6 +61,14 @@ const Home = () => {
     getFriendRequest(GET_FRIEND_REQUEST, user?.userId);
     getUserData(GET_USER_URL + user?.userId);
   }, [user?.userId]);
+
+  // get all notification
+  const getAllNotification = async (url) => {
+    const response = await GetApiCall(url);
+    if (response?.success === true) {
+      dispatch(SetNotification(response?.data));
+    }
+  };
 
   // getUserData
   const getUserData = async (url) => {
@@ -165,6 +175,10 @@ const Home = () => {
     await PostApiCall(VIEW_PROFILE, { id, userId });
   };
 
+  const deleteNotification = async (postId) => {
+    await DeleteApiCall(DELETE_NOTIFICATION + postId);
+  };
+
   // deletePost
 
   const deletePost = async (postId) => {
@@ -180,6 +194,8 @@ const Home = () => {
         duration: 3000,
       });
       getAllPostData(GET_ALL_POSTS, user?.userId);
+      deleteNotification(postId);
+      getAllNotification(GET_NOTIFICATION + user?.userId);
     } else {
       toast.error("Somthing went wrong", {
         style: {

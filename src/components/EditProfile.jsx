@@ -49,7 +49,7 @@ const EditProfile = () => {
         },
         duration: 3000,
       });
-      const updatedUser = await GetApiCall(GET_USER_URL + user?.userId);
+      const updatedUser = await GetApiCall(GET_USER_URL + user.userId);
       localStorage.setItem("user", JSON.stringify(updatedUser.user));
       dispatch(UserLogin(updatedUser.user));
       dispatch(UpdateProfile(false));

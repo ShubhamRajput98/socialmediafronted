@@ -143,248 +143,262 @@ const SinglePost = () => {
     <div className="w-full px-0 lg:px-10 pb-20 2xl:px-40 bg-bgColor lg:rounded-lg h-screen overflow-auto">
       <TopBar />
 
-      <div className="w-full min-h-max mt-5 flex justify-center items-center">
-        <div className="w-[90vh] bg-primary p-4 rounded-xl">
-          <div className="flex gap-3 items-center mb-2">
-            <Link
-              to={"/profile/" + post?.userId?._id}
-              onClick={() => viewProfile(post?.userId?._id)}
-            >
-              <img
-                src={
-                  post?.userId?.profileUrl
-                    ? BASE_URL + "user/" + post?.userId?.profileUrl
-                    : NoProfile
-                }
-                alt={post?.userId?.firstName}
-                className="w-10 h-10 object-cover rounded-[50%] object-center"
-              />
-            </Link>
+      {post ? (
+        <div className="w-full min-h-max mt-5 flex justify-center items-center">
+          <div className="w-[90vh] bg-primary p-4 rounded-xl">
+            <div className="flex gap-3 items-center mb-2">
+              <Link
+                to={"/profile/" + post?.userId?._id}
+                onClick={() => viewProfile(post?.userId?._id)}
+              >
+                <img
+                  src={
+                    post?.userId?.profileUrl
+                      ? BASE_URL + "user/" + post?.userId?.profileUrl
+                      : NoProfile
+                  }
+                  alt={post?.userId?.firstName}
+                  className="w-10 h-10 object-cover rounded-[50%] object-center"
+                />
+              </Link>
 
-            <div className="w-full flex justify-between">
-              <div className="">
-                <Link to={"/profile/" + post?.userId?._id}>
-                  <p className="font-medium text-lg text-ascent-1">
-                    {post?.userId?.name}
-                  </p>
-                </Link>
-                <span className="text-ascent-2">{post?.userId?.location}</span>
+              <div className="w-full flex justify-between">
+                <div className="">
+                  <Link to={"/profile/" + post?.userId?._id}>
+                    <p className="font-medium text-lg text-ascent-1">
+                      {post?.userId?.name}
+                    </p>
+                  </Link>
+                  <span className="text-ascent-2">
+                    {post?.userId?.location}
+                  </span>
+                </div>
+
+                <span className="text-ascent-2">
+                  {moment(post?.createdAt && post?.createdAt).fromNow()}
+                </span>
               </div>
-
-              <span className="text-ascent-2">
-                {moment(post?.createdAt && post?.createdAt).fromNow()}
-              </span>
             </div>
-          </div>
 
-          <div>
-            <p className="text-ascent-2">
-              {/* {showAll === post?._id
+            <div>
+              <p className="text-ascent-2">
+                {/* {showAll === post?._id
             ? post?.description
             : post?.description.slice(0, 300)} */}
 
-              {post?.description?.length > 301 &&
-                (showAll === post?._id ? (
-                  <span
-                    className="text-blue ml-2 font-mediu cursor-pointer"
-                    onClick={() => setShowAll(0)}
-                  >
-                    Show Less
-                  </span>
-                ) : (
-                  <span
-                    className="text-blue ml-2 font-medium cursor-pointer"
-                    onClick={() => setShowAll(post?._id)}
-                  >
-                    Show More
-                  </span>
-                ))}
-            </p>
+                {post?.description?.length > 301 &&
+                  (showAll === post?._id ? (
+                    <span
+                      className="text-blue ml-2 font-mediu cursor-pointer"
+                      onClick={() => setShowAll(0)}
+                    >
+                      Show Less
+                    </span>
+                  ) : (
+                    <span
+                      className="text-blue ml-2 font-medium cursor-pointer"
+                      onClick={() => setShowAll(post?._id)}
+                    >
+                      Show More
+                    </span>
+                  ))}
+              </p>
 
-            {post?.image && (
-              <img
-                src={BASE_URL + "post/" + post?.image}
-                alt="post image"
-                className="w-full mt-2 rounded-lg"
-              />
-            )}
-
-            {post.video && post.video.length > 0 && (
-              <div className="video">
-                <video
-                  onClick={playVideo}
-                  autoPlay={true}
-                  loop={true}
-                  ref={videoRef}
-                  width="100%"
-                >
-                  <source src={BASE_URL + "post" + post.video[0]} />
-                  Your browser does not support the video tag.
-                </video>
-              </div>
-            )}
-          </div>
-
-          <div className="mt-4 flex justify-between items-center px-3 py-2 text-ascent-2 text-base border-t border-[#66666645]">
-            <p
-              className="flex gap-2 items-center text-base cursor-pointer"
-              onClick={() => likePost(post?._id)}
-            >
-              {post?.likes?.includes(user?.userId) ? (
-                <BiSolidLike size={20} color="blue" />
-              ) : (
-                <BiLike size={20} />
+              {post?.image && (
+                <img
+                  src={BASE_URL + "post/" + post?.image}
+                  alt="post image"
+                  className="w-full mt-2 rounded-lg"
+                />
               )}
-              {post?.likes?.length} Likes
-            </p>
 
-            <p
-              className="flex gap-2 items-center text-base cursor-pointer"
-              onClick={() => {
-                setShowComments(showComments === post._id ? null : post._id);
-                getComments(post?._id);
-              }}
-            >
-              <BiComment size={20} />
-              {post?.comments?.length} Comments
-            </p>
+              {post?.video && post?.video?.length > 0 && (
+                <div className="video">
+                  <video
+                    onClick={playVideo}
+                    autoPlay={true}
+                    loop={true}
+                    ref={videoRef}
+                    width="100%"
+                  >
+                    <source src={BASE_URL + "post" + post.video[0]} />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              )}
+            </div>
 
-            {user?.userId === post?.userId?._id && (
-              <div
-                className="flex gap-1 items-center text-base text-ascent-1 cursor-pointer"
-                //   onClick={() => deletePost(post?._id)}
+            <div className="mt-4 flex justify-between items-center px-3 py-2 text-ascent-2 text-base border-t border-[#66666645]">
+              <p
+                className="flex gap-2 items-center text-base cursor-pointer"
+                onClick={() => likePost(post?._id)}
               >
-                <MdOutlineDeleteOutline size={20} />
-                <span>Delete</span>
-              </div>
-            )}
-          </div>
+                {post?.likes?.includes(user?.userId) ? (
+                  <BiSolidLike size={20} color="blue" />
+                ) : (
+                  <BiLike size={20} />
+                )}
+                {post?.likes?.length} Likes
+              </p>
 
-          {/* COMMENTS */}
-          {showComments === post?._id && (
-            <div className="w-full mt-4 border-t border-[#66666645] pt-4 ">
-              <CommentForm
-                user={user}
-                id={post?._id}
-                getComments={() => getComments(post?._id)}
-              />
+              <p
+                className="flex gap-2 items-center text-base cursor-pointer"
+                onClick={() => {
+                  setShowComments(showComments === post._id ? null : post._id);
+                  getComments(post?._id);
+                }}
+              >
+                <BiComment size={20} />
+                {post?.comments?.length} Comments
+              </p>
 
-              {comments?.length > 0 ? (
-                comments?.map((comment) => (
-                  <div className="w-full py-2" key={comment?._id}>
-                    <div className="flex gap-3 items-center mb-1">
-                      <Link to={"/profile/" + comment?.userId?._id}>
-                        <img
-                          src={
-                            comment?.userId?.profileUrl
-                              ? BASE_URL + "post/" + comment?.userId?.profileUrl
-                              : NoProfile
-                          }
-                          alt={comment?.userId?.name}
-                          className="w-10 h-10 rounded-full object-cover"
-                        />
-                      </Link>
-                      <div>
+              {user?.userId === post?.userId?._id && (
+                <div
+                  className="flex gap-1 items-center text-base text-ascent-1 cursor-pointer"
+                  //   onClick={() => deletePost(post?._id)}
+                >
+                  <MdOutlineDeleteOutline size={20} />
+                  <span>Delete</span>
+                </div>
+              )}
+            </div>
+
+            {/* COMMENTS */}
+            {showComments === post?._id && (
+              <div className="w-full mt-4 border-t border-[#66666645] pt-4 ">
+                <CommentForm
+                  user={user}
+                  id={post?._id}
+                  getComments={() => getComments(post?._id)}
+                />
+
+                {comments?.length > 0 ? (
+                  comments?.map((comment) => (
+                    <div className="w-full py-2" key={comment?._id}>
+                      <div className="flex gap-3 items-center mb-1">
                         <Link to={"/profile/" + comment?.userId?._id}>
-                          <p className="font-medium text-base text-ascent-1">
-                            {comment?.userId?.name}
-                          </p>
+                          <img
+                            src={
+                              comment?.userId?.profileUrl
+                                ? BASE_URL +
+                                  "post/" +
+                                  comment?.userId?.profileUrl
+                                : NoProfile
+                            }
+                            alt={comment?.userId?.name}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
                         </Link>
-                        <span className="text-ascent-2 text-sm">
-                          {moment(comment?.createdAt ?? "2023-05-25").fromNow()}
-                        </span>
+                        <div>
+                          <Link to={"/profile/" + comment?.userId?._id}>
+                            <p className="font-medium text-base text-ascent-1">
+                              {comment?.userId?.name}
+                            </p>
+                          </Link>
+                          <span className="text-ascent-2 text-sm">
+                            {moment(
+                              comment?.createdAt ?? "2023-05-25"
+                            ).fromNow()}
+                          </span>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="ml-12">
-                      <p className="text-ascent-2">{comment?.comment}</p>
+                      <div className="ml-12">
+                        <p className="text-ascent-2">{comment?.comment}</p>
 
-                      <div className="mt-2 flex gap-6">
-                        <p
-                          className="flex gap-2 items-center text-base text-ascent-2 cursor-pointer"
-                          onClick={() => likeComment(user?.userId, comment._id)}
-                        >
-                          {comment?.likes?.includes(user?.userId) ? (
-                            <BiSolidLike size={20} color="blue" />
-                          ) : (
-                            <BiLike size={20} />
-                          )}
-                          {comment?.likes?.length} Likes
-                        </p>
-                        <span
-                          className="text-blue cursor-pointer"
-                          onClick={() => setReplyComments(comment?._id)}
-                        >
-                          Reply
-                        </span>
-
-                        {user?.userId === post?.userId?._id && (
-                          <div
-                            className="flex gap-1 items-center text-base text-ascent-1 cursor-pointer"
+                        <div className="mt-2 flex gap-6">
+                          <p
+                            className="flex gap-2 items-center text-base text-ascent-2 cursor-pointer"
                             onClick={() =>
-                              deletePostComment(comment?._id, post?._id)
+                              likeComment(user?.userId, comment._id)
                             }
                           >
-                            <MdOutlineDeleteOutline size={20} />
-                            <span>Delete</span>
-                          </div>
+                            {comment?.likes?.includes(user?.userId) ? (
+                              <BiSolidLike size={20} color="blue" />
+                            ) : (
+                              <BiLike size={20} />
+                            )}
+                            {comment?.likes?.length} Likes
+                          </p>
+                          <span
+                            className="text-blue cursor-pointer"
+                            onClick={() => setReplyComments(comment?._id)}
+                          >
+                            Reply
+                          </span>
+
+                          {user?.userId === post?.userId?._id && (
+                            <div
+                              className="flex gap-1 items-center text-base text-ascent-1 cursor-pointer"
+                              onClick={() =>
+                                deletePostComment(comment?._id, post?._id)
+                              }
+                            >
+                              <MdOutlineDeleteOutline size={20} />
+                              <span>Delete</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {replyComments === comment?._id && (
+                          <CommentForm
+                            user={user}
+                            id={comment?._id}
+                            replyAt={new Date()}
+                            getComments={() => getComments(post?._id)}
+                          />
                         )}
                       </div>
 
-                      {replyComments === comment?._id && (
-                        <CommentForm
-                          user={user}
-                          id={comment?._id}
-                          replyAt={new Date()}
-                          getComments={() => getComments(post?._id)}
-                        />
-                      )}
-                    </div>
+                      {/* REPLIES */}
 
-                    {/* REPLIES */}
-
-                    <div className="py-2 px-8 mt-6">
-                      {comment?.replies?.length > 0 && (
-                        <p
-                          className="text-base text-ascent-1 cursor-pointer"
-                          onClick={() =>
-                            setShowReply(
-                              showReply === comment?.replies?._id
-                                ? 0
-                                : comment?.replies?._id
-                            )
-                          }
-                        >
-                          Show Replies ({comment?.replies?.length})
-                        </p>
-                      )}
-
-                      {showReply === comment?.replies?._id &&
-                        comment?.replies?.map((reply) => (
-                          <ReplyCard
-                            reply={reply}
-                            user={user}
-                            key={reply?._id}
-                            handleLike={() =>
-                              handleLike(
-                                `${BASE_URL}/post/like-comment/${comment?._id}/${reply?._id}`
+                      <div className="py-2 px-8 mt-6">
+                        {comment?.replies?.length > 0 && (
+                          <p
+                            className="text-base text-ascent-1 cursor-pointer"
+                            onClick={() =>
+                              setShowReply(
+                                showReply === comment?.replies?._id
+                                  ? 0
+                                  : comment?.replies?._id
                               )
                             }
-                            getComments={getComments}
-                          />
-                        ))}
+                          >
+                            Show Replies ({comment?.replies?.length})
+                          </p>
+                        )}
+
+                        {showReply === comment?.replies?._id &&
+                          comment?.replies?.map((reply) => (
+                            <ReplyCard
+                              reply={reply}
+                              user={user}
+                              key={reply?._id}
+                              handleLike={() =>
+                                handleLike(
+                                  `${BASE_URL}/post/like-comment/${comment?._id}/${reply?._id}`
+                                )
+                              }
+                              getComments={getComments}
+                            />
+                          ))}
+                      </div>
                     </div>
-                  </div>
-                ))
-              ) : (
-                <span className="flex text-sm py-4 text-ascent-2 text-center">
-                  No Comments, be first to comment
-                </span>
-              )}
-            </div>
-          )}
+                  ))
+                ) : (
+                  <span className="flex text-sm py-4 text-ascent-2 text-center">
+                    No Comments, be first to comment
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="w-full h-screen flex justify-center items-center text-xl text-white">
+          No post found
+        </div>
+      )}
     </div>
   );
 };

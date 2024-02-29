@@ -71,12 +71,13 @@ const TopBar = () => {
               }}
             />
 
-            {notification.every((item) => item.read === false) > 0 && (
-              <span
-                className="absolute top-0 right-0 h-[8px] w-[8px] rounded-full"
-                style={{ background: "red" }}
-              ></span>
-            )}
+            {notification?.length > 0 &&
+              notification?.every((item) => item?.read === false) && (
+                <span
+                  className="absolute top-0 right-0 h-[8px] w-[8px] rounded-full"
+                  style={{ background: "red" }}
+                ></span>
+              )}
           </div>
 
           <div>
